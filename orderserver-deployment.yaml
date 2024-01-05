@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert
+    kompose.version: 1.21.0 (992df58d8)
+  labels:
+    io.kompose.service: orderserver
+  name: orderserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orderserver
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert
+        kompose.version: 1.21.0 (992df58d8)
+      creationTimestamp: null
+      labels:
+        app: orderserver
+    spec:
+      containers:
+      - env:
+        - name: RABBITHOST
+          value: amqp://adminUser:adminPass@rabbitmq
+        - name: STRIPE_SERVER_URL
+          value: http://stripeserver:3002
+        - name: dbURI
+          value: mongodb://nivonj:Student1@mongodb:27017
+        image: snghbeer/sct_jean:orderserver
+        imagePullPolicy: ""
+        name: orderserver
+        ports:
+        - containerPort: 3001
+        resources: {}
+        volumeMounts:
+        - mountPath: /shared
+          name: config-volume
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - name: config-volume
+        persistentVolumeClaim:
+          claimName: config-volume
+---
+apiVersion: v1
+kind: Service
+metadata:
+    annotations:
+      kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert
+      kompose.version: 1.21.0 (992df58d8)
+    labels:
+      app: orderserver
+    name: orderserver
+spec:
+    ports:
+    - protocol: TCP
+      port: 3001
+      targetPort: 3001
+    type: NodePort  
+    selector:
+      app: orderserver

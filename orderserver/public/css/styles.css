@@ -1,0 +1,22 @@
+.gradient-custom {
+    /* fallback for old browsers */
+    background: #1f053a;
+    
+    /* Chrome 10-25, Safari 5.1-6 */
+    background: -webkit-linear-gradient(to right, rgb(47, 34, 68), rgb(51, 62, 82));
+    
+    /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    background: linear-gradient(to right, rgb(47, 34, 68), rgb(51, 62, 82))
+}
+
+.table{
+    color: aliceblue;
+}
+
+.form-label, .search_bar{
+    color: aliceblue !important;
+}
+
+.sortPicker{
+    max-width: 200px !important;
+}

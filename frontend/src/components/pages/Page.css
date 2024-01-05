@@ -1,0 +1,9 @@
+ .contentbodyBg{
+    --color: #2d2c2c;
+    opacity: 1;
+    background-image:  repeating-linear-gradient(45deg, #252424 25%, transparent 25%, transparent 75%, #252424 75%, #252424), repeating-linear-gradient(45deg, #252424 25%, #2d2c2c 25%, #2d2c2c 75%, #252424 75%, #252424);
+    background-position: 0 0, 26px 26px;
+    background-size: 52px 52px;
+    min-height: 100%;
+    
+  }

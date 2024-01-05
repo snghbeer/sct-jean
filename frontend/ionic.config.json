@@ -1,0 +1,7 @@
+{
+  "name": "Nivon",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react"
+}

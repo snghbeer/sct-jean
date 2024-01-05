@@ -1,0 +1,70 @@
+version: "3.1"
+
+networks:
+  default:
+    driver: bridge
+services:
+  mongodb:
+    image: mongodb
+    build:
+      context: ./mongodb
+      dockerfile: Dockerfile
+    ports:
+      - "27017:27017"
+    volumes:
+      - ~/mongo-data/dump:/data/db/dump
+    networks:
+     - default 
+  rabbitmq:
+    image: rabbitmq
+    build:
+      context: ./rabbitmq
+      dockerfile: Dockerfile
+    ports:
+      - "34046:15672"
+      - "5672:5672"
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/data 
+    networks:
+     - default
+  orderserver:
+    image: orderserver
+    build:
+      context: ./orderserver
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    networks:
+     - default 
+    environment:
+      - dbURI=mongodb://nivonj:Student1@mongodb:27017
+      - RABBITHOST=amqp://adminUser:adminPass@rabbitmq
+      - STRIPE_SERVER_URL=http://stripeserver:3002
+    volumes:
+      - config-volume:/shared  
+    depends_on:
+      - mongodb 
+      - rabbitmq
+  stripeserver:
+    image: stripeserver
+    build:
+      context: ./stripeserver
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+    networks:
+     - default 
+    environment:
+      - dbURI=mongodb://nivonj:Student1@mongodb:27017
+      - RABBITHOST=amqp://adminUser:adminPass@rabbitmq
+      #- SERVER_URL=http://127.0.0.1:3002
+      #- REQUESTER_SERVER_URL=http://orderserver:3001
+    depends_on:
+      - mongodb 
+      - rabbitmq 
+      - orderserver
+    command: sh -c "echo 'STRIPE_SERVER_URL=http://stripeserver:3002' > /shared/config.txt && npm start"
+    volumes:
+      - config-volume:/shared
+volumes:
+  config-volume:    

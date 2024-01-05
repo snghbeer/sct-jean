@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: stripeserver
+  name: stripeserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: stripeserver
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert
+        kompose.version: 1.21.0 (992df58d8)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: stripeserver
+    spec:
+      containers:
+      - args:
+        - sh
+        - -c
+        - echo 'STRIPE_SERVER_URL=http://stripeserver:3002' > /shared/config.txt &&
+          npm start
+        env:
+        - name: RABBITHOST
+          value: amqp://adminUser:adminPass@rabbitmq
+        - name: dbURI
+          value: mongodb://nivonj:Student1@mongodb:27017  
+        - name: REQUESTER_SERVER_URL
+          value: http://orderserver:3001
+        - name: NODE_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP  
+        image: snghbeer/sct_jean:stripeserver
+        imagePullPolicy: ""
+        name: stripeserver
+        ports:
+        - containerPort: 3002
+        resources: {}
+        volumeMounts:
+        - mountPath: /shared
+          name: config-volume
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - name: config-volume
+        persistentVolumeClaim:
+          claimName: config-volume
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: /snap/kompose/19/kompose-linux-amd64 convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: stripeserver
+  name: stripeserver
+spec:
+  ports:
+  - protocol: TCP
+    port: 3002
+    targetPort: 3002
+  type: NodePort  
+  selector:
+    io.kompose.service: stripeserver
+status:
+  loadBalancer: {}
